@@ -1,8 +1,14 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+// Public rotaları belirliyoruz
+const isPublicRoute = createRouteMatcher([
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/", // Ana rota (catch-all rota)
+]);
 
 export default clerkMiddleware(async (auth, request) => {
+  // Eğer public route değilse, auth koruması ekleyin
   if (!isPublicRoute(request)) {
     await auth.protect();
   }
@@ -14,7 +20,8 @@ export const config = {
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     // API rotalarını her zaman koruma altına alın
     "/(api|trpc)(.*)",
-    // Catch-all rotayı middleware'den hariç tutun
-    "/(.*)",
+    // Ana rotayı ve onun alt rotalarını middleware'den hariç tutun
+    "/",
+    "/[[...rest]]", // Catch-all rotaları hariç tut
   ],
 };
